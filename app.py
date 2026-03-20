@@ -10,10 +10,12 @@ import gradio as gr
 # The usual start
 
 load_dotenv(override=True)
-gemini = OpenAI(
-    api_key=os.getenv("GOOGLE_API_KEY"), 
-    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-)
+#gemini = OpenAI(
+#    api_key=os.getenv("GOOGLE_API_KEY"), 
+#    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+#)
+
+openai = OpenAI()
 
 # %%
 # For pushover
@@ -21,16 +23,6 @@ gemini = OpenAI(
 pushover_user = os.getenv("PUSHOVER_USER")
 pushover_token = os.getenv("PUSHOVER_TOKEN")
 pushover_url = "https://api.pushover.net/1/messages.json"
-
-if pushover_user:
-    print(f"Pushover user found and starts with {pushover_user[0]}")
-else:
-    print("Pushover user not found")
-
-if pushover_token:
-    print(f"Pushover token found and starts with {pushover_token[0]}")
-else:
-    print("Pushover token not found")
 
 # %%
 def push(message):
@@ -172,10 +164,13 @@ particularly questions related to {name}'s career, background, skills and experi
 Your responsibility is to represent {name} for interactions on the website as faithfully as possible. \
 You are given a resume of {name}'s and LinkedIn profile which you can use to answer questions. \
 Be professional and engaging, as if talking to a potential client or future employer who came across the website. \
-First let user know what all information you can provide and also tell user that if they need resume they can request by giving their email\
-If you don't know the answer to any question, use your tool_unknown_question tool to record the question that you couldn't answer, even if it's about something trivial or unrelated to career. \
-If the user is engaging in discussion, try to steer them towards getting in touch via email; ask for their email and record it using your tool_user_details tool. \
-If user request for resume copy, ask user for email and use tool_resume_request tool to send resume request."
+First let user know you can share details about my career, background, skills,and experience. Do not give any details yet and also tell user in a new line that if they need resume they can request by giving their email.Do not repeat yourself.\
+If the user asks for any fact that is not explicitly available in the resume or LinkedIn text provided, do not guess.\
+You must call tool_unknown_question before replying.\
+This includes personal details like address, phone number, exact location, salary, age, or any unrelated question.\
+After calling the tool, briefly tell the user that you do not have that information and suggest getting in touch by email.\
+If the user is engaging in discussion, try to steer them towards getting in touch via email; ask for their email and record it using your tool_user_details tool. Be concise.\
+If user request for resume copy, ask user for email and use tool_resume_request tool to send resume request and let user know that resume will be sent shortly."
 
 system_prompt += f"\n\n## Summary:\n{resume}\n\n## LinkedIn Profile:\n{linkedin}\n\n"
 system_prompt += f"With this context, please chat with the user, always staying in character as {name}."
@@ -189,7 +184,7 @@ def chat(message, history):
 
         # This is the call to the LLM - see that we pass in the tools json
 
-        response = gemini.chat.completions.create(model="gemini-2.5-flash", messages=messages, tools=tools)
+        response = openai.chat.completions.create(model="gpt-5-nano", messages=messages, tools=tools)
 
         finish_reason = response.choices[0].finish_reason
         
@@ -206,7 +201,7 @@ def chat(message, history):
     return response.choices[0].message.content
 
 # %%
-gr.ChatInterface(chat, type="messages",title="Rajan AI – Interactive Resume").launch()
+gr.ChatInterface(chat, type="messages",title="Rajan AI – Interactive Resume").launch(share=True)
 
 
 
