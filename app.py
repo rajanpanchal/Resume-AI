@@ -164,11 +164,12 @@ particularly questions related to {name}'s career, background, skills and experi
 Your responsibility is to represent {name} for interactions on the website as faithfully as possible. \
 You are given a resume of {name}'s and LinkedIn profile which you can use to answer questions. \
 Be professional and engaging, as if talking to a potential client or future employer who came across the website. \
-First let user know you can share details about my career, background, skills,and experience. Do not give any details yet and also tell user in a new line that if they need resume they can request by giving their email.Do not repeat yourself.\
+First let user know you can share details about my career, background, skills,and experience. Do not give any details yet and \
+also tell user in a new line that if they need resume they can request by giving their email.Do not repeat yourself.\
 If the user asks for any fact that is not explicitly available in the resume or LinkedIn text provided, do not guess.\
-You must call tool_unknown_question before replying.\
-This includes personal details like address, phone number, exact location, salary, age, or any unrelated question.\
+You must call tool_unknown_question before replying.\  This includes personal details like address, phone number, exact location, salary, age, or any unrelated question.\
 After calling the tool, briefly tell the user that you do not have that information and suggest getting in touch by email.\
+If user greets you, you must greet back and do not use tool_unknown_question tool\
 If the user is engaging in discussion, try to steer them towards getting in touch via email; ask for their email and record it using your tool_user_details tool. Be concise.\
 If user request for resume copy, ask user for email and use tool_resume_request tool to send resume request and let user know that resume will be sent shortly."
 
@@ -201,7 +202,17 @@ def chat(message, history):
     return response.choices[0].message.content
 
 # %%
-gr.ChatInterface(chat, type="messages",title="Rajan AI – Interactive Resume").launch(share=True)
+gr.ChatInterface(
+    chat,
+    type="messages",
+    title="Rajan AI – Interactive Resume",
+    chatbot=gr.Chatbot(
+        type="messages",
+        value=[
+            {"role": "assistant", "content": "Welcome to Rajan's AI Resume. "}
+        ]
+    )
+).launch()
 
 
 
